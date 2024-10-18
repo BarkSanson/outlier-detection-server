@@ -7,19 +7,27 @@ from .detection_wrapper import DetectionWrapper
 from .station_data import StationData
 
 
-def create_app():
-    app = Flask(__name__, instance_relative_config=True)
+def configure_logger():
+    os.makedirs("logs", exist_ok=True)
 
     app_logger = logging.getLogger('app_logger')
     app_logger.setLevel(logging.INFO)
 
-    handler = logging.FileHandler("results.log")
+    handler = logging.FileHandler("./logs/results.log")
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     handler.setFormatter(formatter)
 
     app_logger.addHandler(handler)
 
+    return app_logger
+
+
+def create_app():
+    app = Flask(__name__, instance_relative_config=True)
+
     wrapper = DetectionWrapper()
+
+    app_logger = configure_logger()
 
     @app.route('/detection')
     def data():
