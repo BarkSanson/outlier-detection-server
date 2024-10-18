@@ -1,5 +1,3 @@
-import os
-
 from flask import Flask, request
 
 from .detection_wrapper import DetectionWrapper
@@ -8,10 +6,6 @@ from .station_data import StationData
 
 def create_app():
     app = Flask(__name__, instance_relative_config=True)
-
-    os.makedirs(app.instance_path, exist_ok=True)
-
-    app.config.from_pyfile('config.py')
 
     wrapper = DetectionWrapper()
 
