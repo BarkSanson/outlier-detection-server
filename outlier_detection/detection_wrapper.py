@@ -10,7 +10,7 @@ from .station_data import StationData
 SCORE_THRESHOLD = 0.8
 ALPHA = 0.05
 SLOPE_THRESHOLD = 0.1
-WINDOW_SIZE = 128
+WINDOW_SIZE = 256
 
 
 class DetectionWrapper:

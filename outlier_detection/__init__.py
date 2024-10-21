@@ -1,6 +1,7 @@
 import logging
 import os
 
+import requests
 from flask import Flask, request
 
 from .detection_wrapper import DetectionWrapper
@@ -37,17 +38,17 @@ def create_app():
 
         result = wrapper.update(station_values)
 
-        # TODO: send results to the other server
-        # - DATA_SERVER_HOST
-        # - DATA_SERVER_PORT
-        # - DATA_SERVER_ENDPOINT
         if result is None:
             app_logger.info("No outliers yet")
 
             return {"status": "Ok"}, 200
 
+        requests.post(
+            f"{os.environ['DATA_SERVER_ENDPOINT']}",
+            json=result.to_json())
+
         app_logger.info(f"{result.to_json()}")
 
-        return result.to_json(), 200
+        return {"status": "Outliers detected"}, 200
 
     return app
