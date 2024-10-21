@@ -29,7 +29,7 @@ def create_app():
 
     app_logger = configure_logger()
 
-    @app.route('/detection')
+    @app.post('/detection')
     def data():
         station_values = StationData.from_json(request.json)
 
