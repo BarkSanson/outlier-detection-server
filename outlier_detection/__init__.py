@@ -25,6 +25,8 @@ def configure_logger():
 def create_app():
     app = Flask(__name__, instance_relative_config=True)
 
+    os.makedirs('data', exist_ok=True)
+
     wrapper = DetectionWrapper()
 
     app_logger = configure_logger()

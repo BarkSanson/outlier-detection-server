@@ -1,3 +1,6 @@
+import os.path
+import pickle
+
 import numpy as np
 
 from online_outlier_detection.pipelines import MKWIForestBatchPipeline
@@ -19,6 +22,8 @@ class DetectionWrapper:
                 slope_threshold=SLOPE_THRESHOLD,
                 window_size=WINDOW_SIZE) for field in StationData.get_fields() if field.name not in ["date"]}
 
+        self._load_state()
+
     def update(self, data: StationData) -> OutlierResponse | None:
         self.date_buffer = np.append(self.date_buffer, data.date)
 
@@ -29,6 +34,8 @@ class DetectionWrapper:
                 continue
 
             results[field.name] = self.pipelines[field.name].update(getattr(data, field.name))
+
+        self._save_state()
 
         if np.all([result is None for result in results.values()]):
             return None
@@ -52,4 +59,20 @@ class DetectionWrapper:
             return None
 
         return final_result
+
+    def _load_state(self):
+        if os.path.exists('./data/pipelines.pkl'):
+            with open('./data/pipelines.pkl', 'rb') as f:
+                self.pipelines = pickle.load(f)
+
+        if os.path.exists('./data/dates.pkl'):
+            with open('./data/dates.pkl', 'rb') as f:
+                self.date_buffer = pickle.load(f)
+
+    def _save_state(self):
+        with open('./data/pipelines.pkl', 'wb') as f:
+            pickle.dump(self.pipelines, f)
+
+        with open('./data/dates.pkl', 'wb') as f:
+            pickle.dump(self.date_buffer, f)
 
