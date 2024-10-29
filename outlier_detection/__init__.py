@@ -1,4 +1,6 @@
 import logging
+from logging.config import dictConfig
+
 import os
 
 import requests
@@ -8,17 +10,19 @@ from .detection_wrapper import DetectionWrapper
 from .station_data import StationData
 
 
-def configure_logger():
+def configure_loggers():
     os.makedirs("logs", exist_ok=True)
+
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
     app_logger = logging.getLogger('app_logger')
     app_logger.setLevel(logging.INFO)
 
-    handler = logging.FileHandler("./logs/results.log")
+    file_handler = logging.FileHandler("./logs/results.log")
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    handler.setFormatter(formatter)
+    file_handler.setFormatter(formatter)
 
-    app_logger.addHandler(handler)
+    app_logger.addHandler(file_handler)
 
     return app_logger
 
@@ -30,7 +34,7 @@ def create_app():
 
     wrapper = DetectionWrapper()
 
-    app_logger = configure_logger()
+    app_logger = configure_loggers()
 
     @app.post('/detection')
     def data():
