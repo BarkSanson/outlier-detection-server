@@ -1,4 +1,4 @@
-from dataclasses import dataclass, fields
+from dataclasses import dataclass, fields, asdict
 
 
 @dataclass
@@ -21,26 +21,29 @@ class StationData:
 
     @staticmethod
     def from_json(data: dict):
-        mostra = data["mostra"]
+        sample = data["mostra"]
 
         return StationData(
             date=data["date"],
-            solar_radiation=mostra["solar_radiation"],
-            precipitation=mostra["precipitation"],
-            lightning_strike_count=mostra["lightningStrikeCount"],
-            lightning_strike_distance=mostra["lightningStrikeDistance"],
-            wind_speed=mostra["windSpeed"],
-            wind_direction=mostra["windDirection"],
-            wind_speed_max=mostra["windSpeedMax"],
-            air_temperature=mostra["airTemperature"],
-            relative_humidity=mostra["relativeHumidity"],
-            vapor_pressure=mostra["vaporPressure"],
-            barometric_pressure=mostra["barometricPressure"],
-            humidity_sensor_temperature=mostra["humiditySensorTemperature"],
-            tilt_north_south=mostra["tiltNorthSouth"],
-            tilt_west_east=mostra["tiltWestEast"]
+            solar_radiation=sample["solar_radiation"],
+            precipitation=sample["precipitation"],
+            lightning_strike_count=sample["lightningStrikeCount"],
+            lightning_strike_distance=sample["lightningStrikeDistance"],
+            wind_speed=sample["windSpeed"],
+            wind_direction=sample["windDirection"],
+            wind_speed_max=sample["windSpeedMax"],
+            air_temperature=sample["airTemperature"],
+            relative_humidity=sample["relativeHumidity"],
+            vapor_pressure=sample["vaporPressure"],
+            barometric_pressure=sample["barometricPressure"],
+            humidity_sensor_temperature=sample["humiditySensorTemperature"],
+            tilt_north_south=sample["tiltNorthSouth"],
+            tilt_west_east=sample["tiltWestEast"]
         )
 
     @staticmethod
     def get_fields():
         return fields(StationData)
+
+    def __str__(self):
+        return str(asdict(self))

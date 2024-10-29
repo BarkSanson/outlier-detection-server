@@ -35,6 +35,8 @@ def create_app():
     @app.post('/detection')
     def data():
         station_values = StationData.from_json(request.json)
+        app_logger.info(f"Received JSON {request.json}")
+        app_logger.info(f"Received data {station_values}")
 
         result = wrapper.update(station_values)
 

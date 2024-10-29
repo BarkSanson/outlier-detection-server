@@ -43,6 +43,9 @@ class DetectionWrapper:
         final_result = OutlierResponse()
 
         for variable, result in results.items():
+            if result is None:
+                continue
+
             _, labels = result
             if not np.any(labels == 1):
                 continue
