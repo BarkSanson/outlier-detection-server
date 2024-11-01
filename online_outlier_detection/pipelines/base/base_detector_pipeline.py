@@ -1,3 +1,4 @@
+import pickle
 from abc import ABC, abstractmethod
 
 import numpy as np
@@ -53,3 +54,8 @@ class BaseDetectorPipeline(ABC):
         self.model.fit(self.reference_window.reshape(-1, 1))
         self._retrains += 1
         print(f"Retraining model... Number of retrains: {self._retrains}")
+
+    def save_state(self, path):
+        with open(path, "wb") as f:
+            pickle.dump(self.model, f)
+

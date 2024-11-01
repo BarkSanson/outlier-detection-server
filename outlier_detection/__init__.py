@@ -1,13 +1,7 @@
 import logging
-from logging.config import dictConfig
-
 import os
 
-import requests
-from flask import Flask, request
-
-from .detection_wrapper import DetectionWrapper
-from .station_data import StationData
+from flask import Flask
 
 
 def configure_loggers():
@@ -24,37 +18,14 @@ def configure_loggers():
 
     app_logger.addHandler(file_handler)
 
-    return app_logger
-
-
 def create_app():
     app = Flask(__name__, instance_relative_config=True)
 
     os.makedirs('data', exist_ok=True)
 
-    wrapper = DetectionWrapper()
+    configure_loggers()
 
-    app_logger = configure_loggers()
-
-    @app.post('/detection')
-    def data():
-        station_values = StationData.from_json(request.json)
-        app_logger.info(f"Received JSON {request.json}")
-        app_logger.info(f"Received data {station_values}")
-
-        result = wrapper.update(station_values)
-
-        if result is None:
-            app_logger.info("No outliers yet")
-
-            return {"status": "Ok"}, 200
-
-        requests.post(
-            f"{os.environ['DATA_SERVER_ENDPOINT']}",
-            json=result.to_json())
-
-        app_logger.info(f"{result.to_json()}")
-
-        return {"status": "Outliers detected"}, 200
+    from . import detection
+    app.register_blueprint(detection.bp)
 
     return app
