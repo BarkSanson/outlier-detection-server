@@ -29,7 +29,8 @@ class MKWIForestBatchPipeline(BatchDetectorPipeline):
             return None
 
         if not self.warm:
-            return self._first_training(), True
+            scores, labels = self._first_training()
+            return scores, labels, True
 
         if self.drift_detector.detect_drift(self.window.get(), self.reference_window):
             self._retrain()

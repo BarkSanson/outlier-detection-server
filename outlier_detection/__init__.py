@@ -21,11 +21,11 @@ def configure_loggers():
 def create_app():
     app = Flask(__name__, instance_relative_config=True)
 
-    os.makedirs('data', exist_ok=True)
+    os.makedirs('models', exist_ok=True)
 
     configure_loggers()
 
-    from . import detection
+    from outlier_detection.blueprints import detection
     app.register_blueprint(detection.bp)
 
     return app

@@ -23,20 +23,19 @@ def initialize():
 
 @bp.route('/detection', methods=['POST'])
 def detection():
-    detection_request = DetectionRequest.from_json(request.json)
     app_logger.info(f"Received JSON {request.json}")
-    app_logger.info(f"Received data {detection_request}")
+    detection_request = DetectionRequest.from_json(request.json)
 
-    result = detection_service.update(detection_request)
+    result = detection_service.detect_outliers(detection_request)
 
     if result is None:
         app_logger.info("No outliers yet")
 
         return {"status": "Ok"}, 200
 
-    requests.post(
-        f"{os.environ['DATA_SERVER_ENDPOINT']}",
-        json=result.to_json())
+    #requests.post(
+    #    f"{os.environ['DATA_SERVER_ENDPOINT']}",
+    #    json=result.to_json())
 
     app_logger.info(f"{result.to_json()}")
 

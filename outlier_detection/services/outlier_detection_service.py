@@ -12,22 +12,62 @@ class StationOutlierDetectionService:
             station_id=initialize_request.station_id,
             variables=initialize_request.variables)
 
-    def update(self, request: DetectionRequest) -> OutlierResponse | None:
+    def detect_outliers(self, request: DetectionRequest) -> OutlierResponse | None:
         results = OutlierResponse()
 
-        for station_request in request.requests:
-            if station_request.id_station not in self.stations:
-                continue
+        samples = self._transform_samples(request.samples)
 
-            station = self.stations[station_request.id_station]
-            result = station.update(station_request.variables)
+        result = self.stations[request.station_id].update(samples)
 
-            if result is not None:
-                results.add_detection(result)
-
-        if len(results) == 0:
+        if result is None:
             return None
 
+        results.add_detection(result)
+
         return results
+
+    def _transform_samples(self, samples):
+        # Transform samples with shape:
+        # {
+        #   "mostres": [
+        #       {
+        #           "timestamp": "2021-09-01T00:00:00",
+        #           "variable_1": 0.1,
+        #           "variable_2": 0.2
+        #       },
+        #       {
+        #           "timestamp": "2021-09-01T00:00:01",
+        #           "variable_1": 0.2,
+        #           "variable_2": 0.3
+        #       }
+        #   ]
+        # }
+        # to:
+        # {
+        #   "variable_1": {
+        #       "data": [0.1, 0.2],
+        #       "dates": ["2021-09-01T00:00:00", "2021-09-01T00:00:01"]
+        #   },
+        #   "variable_2": {
+        #       "data": [0.2, 0.3],
+        #       "dates": ["2021-09-01T00:00:00", "2021-09-01T00:00:01"]
+        #   }
+        # }
+        transformed_data = {}
+
+        for sample in samples:
+            for variable, x in sample.items():
+                if variable == "timestamp":
+                    continue
+
+                if variable not in transformed_data:
+                    transformed_data[variable] = {"data": [], "dates": []}
+
+                transformed_data[variable]["data"].append(x)
+                transformed_data[variable]["dates"].append(sample["timestamp"])
+
+        return transformed_data
+
+
 
 detection_service = StationOutlierDetectionService()

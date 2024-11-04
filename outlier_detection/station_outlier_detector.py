@@ -1,12 +1,10 @@
 from dataclasses import dataclass
+from datetime import datetime
 
 import numpy as np
 
-from online_outlier_detection.pipelines import MKWIForestBatchPipeline
+from outlier_detection.variable_detector import VariableDetector
 
-SCORE_THRESHOLD = 0.8
-ALPHA = 0.05
-SLOPE_THRESHOLD = 0.1
 
 @dataclass
 class VariableOutliers:
@@ -41,58 +39,35 @@ class StationOutlierDetector:
             station_id: str,
             variables: dict):
         self.station_id = station_id
+        self.timestamp_buffer = []
 
-        self.pipelines = {variable: MKWIForestBatchPipeline(
-            score_threshold=SCORE_THRESHOLD,
-            alpha=ALPHA,
-            slope_threshold=SLOPE_THRESHOLD,
-            window_size=window_size) for variable, window_size in variables.items()}
+        self.detectors = {
+            variable: VariableDetector(station_id=self.station_id, variable=variable, window_size=window_size)
+            for variable, window_size in variables.items()
+        }
 
-    def update(self, data: dict[str, list]) -> OutliersDetected | None:
+    def update(self, data: dict) -> OutliersDetected | None:
         results = {}
 
-        for variable, data in data.items():
-            if variable not in self.pipelines:
+        for variable, x in data.items():
+            if variable not in self.detectors:
                 continue
 
-            # TODO: control cases where data is bigger than window size
-            if len(data) > self.pipelines[variable].window_size:
-                pass
-
-            for x in data:
-                result = self.pipelines[variable].update(x)
-
-                if result is None:
-                    continue
-
-                _, labels, retrain = result
-
-                # For research purposes, if there is a retrain, save the model. TODO
-                if retrain:
-                    self.pipelines[variable].save_state(f"data/{self.station_id}_{variable}_{data.date}.pkl")
-
-                results[variable].extend(labels)
+            results[variable] = self.detectors[variable].update(x)
 
         final_result = OutliersDetected()
 
-        for variable, labels in results.items():
-            if labels is None:
+        for variable, outliers in results.items():
+            if outliers is None:
                 continue
 
-
-            if not np.any(labels == 1):
-                continue
-
-            outlier_indices = np.where(labels == 1)[0]
-
-            outliers = VariableOutliers(
+            final_result.add_outlier(VariableOutliers(
                 station_id=self.station_id,
                 variable=variable,
-                dates=list(data.date[outlier_indices]))
+                dates=outliers
+            ))
 
-            final_result.add_outlier(outliers)
-
-        return final_result
+        return final_result if len(final_result) > 0 else None
 
     def _load_state(self, path: str):
         # TODO

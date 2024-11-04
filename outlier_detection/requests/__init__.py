@@ -1,2 +1,2 @@
 from .initialize_request import InitializeRequest
-from .detection_request import DetectionRequest, StationOutlierRequest
+from .detection_request import DetectionRequest
