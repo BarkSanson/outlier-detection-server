@@ -1,7 +1,4 @@
 from dataclasses import dataclass
-from datetime import datetime
-
-import numpy as np
 
 from outlier_detection.variable_detector import VariableDetector
 
@@ -68,7 +65,3 @@ class StationOutlierDetector:
             ))
 
         return final_result if len(final_result) > 0 else None
-
-    def _load_state(self, path: str):
-        # TODO
-        pass

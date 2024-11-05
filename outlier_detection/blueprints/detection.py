@@ -26,7 +26,12 @@ def detection():
     app_logger.info(f"Received JSON {request.json}")
     detection_request = DetectionRequest.from_json(request.json)
 
-    result = detection_service.detect_outliers(detection_request)
+    try:
+        result = detection_service.detect_outliers(detection_request)
+    except KeyError:
+        app_logger.error(f"Station {detection_request.station_id} not initialized")
+
+        return {"status": "Station not initialized"}, 404
 
     if result is None:
         app_logger.info("No outliers yet")
