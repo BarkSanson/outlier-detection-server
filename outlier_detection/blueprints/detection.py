@@ -33,15 +33,20 @@ def detection():
 
         return {"status": "Station not initialized"}, 404
 
+    # Confirm that the data has been processed successfully
+    requests.post(
+        f"{os.environ['DATA_SERVER_ENDPOINT']}/outliers/validate",
+        json={"id_estacio": detection_request.station_id})
+
     if result is None:
         app_logger.info("No outliers yet")
 
         return {"status": "Ok"}, 200
 
-    #requests.post(
-    #    f"{os.environ['DATA_SERVER_ENDPOINT']}",
-    #    json=result.to_json())
+    requests.post(
+        f"{os.environ['DATA_SERVER_ENDPOINT']}/outliers",
+        json=result.to_json())
 
     app_logger.info(f"{result.to_json()}")
 
-    return {"status": "Outliers detected"}, 200
+    return {"status": "Ok"}, 200

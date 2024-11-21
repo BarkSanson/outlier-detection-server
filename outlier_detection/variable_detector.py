@@ -52,7 +52,7 @@ class VariableDetector:
             # a way to save the model in case of a crash.
             if retrain:
                 self._save_state(
-                    f"models/{self.station_id}_{self.variable}_{self.window_size}_{datetime.now().strftime("%Y%m%d-%H%M%S")}.pkl")
+                    f"models/{self.station_id}_{self.variable}_{self.window_size}_{datetime.now().strftime('%Y%m%d-%H%M%S')}.pkl")
 
             self.timestamp_buffer = []
 
